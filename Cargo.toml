@@ -5,6 +5,7 @@ authors = ["chris ricketts <chris.ricketts@steribar.com>"]
 description = "Message broker for the Actix actor framework"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/Chris-Ricketts/actix-broker"
+readme = "README.md"
 keywords = ["actix", "message", "broker"]
 exclude = [".gitignore"]
 
