@@ -1,6 +1,6 @@
 [package]
 name = "actix-broker"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["chris ricketts <chris.ricketts@steribar.com>"]
 description = "Message broker for the Actix actor framework"
 license = "MIT OR Apache-2.0"
