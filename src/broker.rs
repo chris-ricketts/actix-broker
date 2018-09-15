@@ -16,7 +16,19 @@ pub struct Broker {
     msg_map: TypeMap<Box<Any>>,
 }
 
+/// The system service actor that keeps track of subscriptions and routes messages to them.
 impl Broker {
+    /// Send messages asynchronously via the broker. It can be called from with
+    /// actors with a `SyncContext`, or where you don't have access to `self`. e.g. From within
+    /// a `HttpHandler` from `actix-web`.
+    pub fn issue_async<M: BrokerMsg>(msg: M)
+    where 
+        <M as Message>::Result: Send,
+    {
+        let broker = Self::from_registry();
+        broker.do_send(IssueAsync(msg));
+    }
+
     fn take_subs<M: BrokerMsg>(&mut self) -> Option<Vec<Recipient<M>>>
     where
         <M as Message>::Result: Send,
