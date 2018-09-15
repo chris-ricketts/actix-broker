@@ -21,7 +21,7 @@ impl Actor for ActorOne {
 impl Handler<MessageTwo> for ActorOne {
     type Result = ();
 
-    fn handle(&mut self, msg: MessageTwo, ctx: &mut Self::Context) {
+    fn handle(&mut self, msg: MessageTwo, _ctx: &mut Self::Context) {
         println!("ActorOne Received: {:?}", msg);
     }
 }
@@ -37,7 +37,7 @@ impl Actor for ActorTwo {
 impl Handler<MessageOne> for ActorTwo {
     type Result = ();
 
-    fn handle(&mut self, msg: MessageOne, ctx: &mut Self::Context) {
+    fn handle(&mut self, msg: MessageOne, _ctx: &mut Self::Context) {
         println!("ActorTwo Received: {:?}", msg);
         self.issue_async(MessageTwo(0));
     }
@@ -54,7 +54,7 @@ impl Actor for ActorThree {
 impl Handler<MessageOne> for ActorThree {
     type Result = ();
 
-    fn handle(&mut self, msg: MessageOne, ctx: &mut Self::Context) {
+    fn handle(&mut self, msg: MessageOne, _ctx: &mut Self::Context) {
         println!("ActorThree Received: {:?}", msg);
         self.issue_async(MessageTwo(1));
     }
