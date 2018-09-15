@@ -11,7 +11,8 @@ Simply include the `BrokerSubscribe` & `BrokerIssue` traits then the following f
 self.subscribe_async::<MessageType>(ctx);
 
 // Asynchronoulsy send a message to any subscribers
-self.issue_async(MessageType);
+let msg = MessageType::new();
+self.issue_async(msg);
 
 // Synchronously subscribe to a message
 // The calling actor will be notified of the 
@@ -19,7 +20,8 @@ self.issue_async(MessageType);
 self.subscribe_sync::<MessageType>(ctx);
 
 // Synchronously send a message to any subscribers.
-self.issue_sync(MessageType, ctx);
+let msg = MessageType::new();
+self.issue_sync(msg, ctx);
 ```
 
 ## Example
