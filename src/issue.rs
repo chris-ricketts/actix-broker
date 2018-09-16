@@ -4,7 +4,11 @@ use broker::Broker;
 use msgs::*;
 
 /// The `BrokerIssue` provides functions to issue messages to any subscribers.
-pub trait BrokerIssue: Actor<Context = Context<Self>> {
+pub trait BrokerIssue
+where 
+    Self: Actor,
+    <Self as Actor>::Context: AsyncContext<Self>
+{
     /// Asynchronously issue a message.
     fn issue_async<M: BrokerMsg>(&self, msg: M)
     where
@@ -33,6 +37,7 @@ pub trait BrokerIssue: Actor<Context = Context<Self>> {
 
 impl<A> BrokerIssue for A
 where
-    A: Actor<Context = Context<A>>,
+    A: Actor,
+    <A as Actor>::Context: AsyncContext<A>
 {
 }
