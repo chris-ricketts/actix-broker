@@ -15,7 +15,6 @@ where
     /// Asynchronously subscribe to a message.
     fn subscribe_async<M: BrokerMsg>(&self, ctx: &mut Self::Context)
     where
-        <M as Message>::Result: Send,
         Self: Handler<M>,
         <Self as Actor>::Context: ToEnvelope<Self, M>,
     {
@@ -30,7 +29,6 @@ where
     /// message is sent to the calling actor after it has subscribed.
     fn subscribe_sync<M: BrokerMsg>(&self, ctx: &mut Self::Context)
     where
-        <M as Message>::Result: Send,
         Self: Handler<M>,
         <Self as Actor>::Context: ToEnvelope<Self, M>,
     {

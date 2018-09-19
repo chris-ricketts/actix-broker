@@ -73,6 +73,8 @@ mod issue;
 mod msgs;
 mod subscribe;
 
+pub use msgs::BrokerMsg;
+
 pub use broker::Broker;
 
 pub use subscribe::BrokerSubscribe;

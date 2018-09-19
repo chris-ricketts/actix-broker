@@ -10,10 +10,7 @@ where
     <Self as Actor>::Context: AsyncContext<Self>
 {
     /// Asynchronously issue a message.
-    fn issue_async<M: BrokerMsg>(&self, msg: M)
-    where
-        <M as Message>::Result: Send,
-    {
+    fn issue_async<M: BrokerMsg>(&self, msg: M) {
         let broker = Broker::from_registry();
         broker.do_send(IssueAsync(msg));
     }
@@ -21,10 +18,7 @@ where
     /// Synchronously issue a message.
     /// This also causes the broker to synchronously forward those messages on to any subscribers
     /// before handling any other messages.
-    fn issue_sync<M: BrokerMsg>(&self, msg: M, ctx: &mut Self::Context)
-    where
-        <M as Message>::Result: Send,
-    {
+    fn issue_sync<M: BrokerMsg>(&self, msg: M, ctx: &mut Self::Context) {
         let broker = Broker::from_registry();
         broker
             .send(IssueSync(msg))

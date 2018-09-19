@@ -21,18 +21,12 @@ impl Broker {
     /// Send messages asynchronously via the broker. It can be called from with
     /// actors with a `SyncContext`, or where you don't have access to `self`. e.g. From within
     /// a `HttpHandler` from `actix-web`.
-    pub fn issue_async<M: BrokerMsg>(msg: M)
-    where 
-        <M as Message>::Result: Send,
-    {
+    pub fn issue_async<M: BrokerMsg>(msg: M) {
         let broker = Self::from_registry();
         broker.do_send(IssueAsync(msg));
     }
 
-    fn take_subs<M: BrokerMsg>(&mut self) -> Option<Vec<Recipient<M>>>
-    where
-        <M as Message>::Result: Send,
-    {
+    fn take_subs<M: BrokerMsg>(&mut self) -> Option<Vec<Recipient<M>>> {
         let id = TypeId::of::<M>();
         let subs = self.sub_map.get_mut(&id)?;
         trace!("Broker: Found subscription list for {:?}.", id);
@@ -44,10 +38,7 @@ impl Broker {
         Some(subs)
     }
 
-    fn add_sub<M: BrokerMsg>(&mut self, sub: Recipient<M>)
-    where
-        <M as Message>::Result: Send,
-    {
+    fn add_sub<M: BrokerMsg>(&mut self, sub: Recipient<M>) {
         let id = TypeId::of::<M>();
         let boxed = Box::new(sub);
         if let Some(subs) = self.sub_map.get_mut(&id) {
@@ -82,10 +73,7 @@ impl Broker {
     }
 }
 
-impl<M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker
-where
-    <M as Message>::Result: Send,
-{
+impl<M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker {
     type Result = ();
 
     fn handle(&mut self, msg: SubscribeAsync<M>, _ctx: &mut Context<Self>) {
@@ -94,10 +82,7 @@ where
     }
 }
 
-impl<M: BrokerMsg> Handler<SubscribeSync<M>> for Broker
-where
-    <M as Message>::Result: Send,
-{
+impl<M: BrokerMsg> Handler<SubscribeSync<M>> for Broker {
     type Result = Option<M>;
 
     fn handle(&mut self, msg: SubscribeSync<M>, _ctx: &mut Context<Self>) -> Self::Result {
@@ -107,10 +92,7 @@ where
     }
 }
 
-impl<M: BrokerMsg> Handler<IssueAsync<M>> for Broker
-where
-    <M as Message>::Result: Send,
-{
+impl<M: BrokerMsg> Handler<IssueAsync<M>> for Broker {
     type Result = ();
 
     fn handle(&mut self, msg: IssueAsync<M>, _ctx: &mut Context<Self>) {
@@ -130,10 +112,7 @@ where
     }
 }
 
-impl<M: BrokerMsg> Handler<IssueSync<M>> for Broker
-where
-    <M as Message>::Result: Send,
-{
+impl<M: BrokerMsg> Handler<IssueSync<M>> for Broker {
     type Result = ();
 
     fn handle(&mut self, msg: IssueSync<M>, ctx: &mut Context<Self>) {
