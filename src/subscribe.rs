@@ -2,6 +2,8 @@
 use actix::prelude::*;
 use actix::dev::ToEnvelope;
 
+use std::any::TypeId;
+
 use broker::Broker;
 use msgs::*;
 
@@ -20,7 +22,7 @@ where
     {
         let broker = Broker::from_registry();
         let recipient = ctx.address().recipient::<M>();
-        broker.do_send(SubscribeAsync(recipient));
+        broker.do_send(SubscribeAsync(recipient, TypeId::of::<Self>()));
     }
 
     /// Synchronously subscribe to a message.
@@ -36,7 +38,7 @@ where
         let recipient = ctx.address().recipient::<M>();
 
         broker
-            .send(SubscribeSync(recipient))
+            .send(SubscribeSync(recipient, TypeId::of::<Self>()))
             .into_actor(self)
             .map_err(|_, _, _| ())
             .map(move |m, _, ctx| {

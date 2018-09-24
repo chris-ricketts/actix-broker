@@ -10,42 +10,51 @@ use std::time::Duration;
 #[derive(Clone, Message)]
 struct TestMessageOne(u8);
 
-#[derive(Clone, Message)]
-struct TestMessageTwo(&'static str);
+struct TestActorOne;
 
-struct TestActor;
+struct TestActorTwo;
 
-impl Actor for TestActor {
+impl Actor for TestActorOne {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.issue_sync(TestMessageTwo("test"), ctx);
-        self.subscribe_async::<TestMessageOne>(ctx);
+        self.subscribe_sync::<TestMessageOne>(ctx);
         ctx.run_later(
             Duration::from_millis(250), 
             |a, _| a.issue_async(TestMessageOne(255))); 
     }
 }
 
-impl Handler<TestMessageOne> for TestActor {
-    type Result = ();
+impl Actor for TestActorTwo {
+    type Context = Context<Self>;
 
-    fn handle(&mut self, msg: TestMessageOne, ctx: &mut Self::Context) {
-        assert_eq!(msg.0, 255);
-        self.subscribe_sync::<TestMessageTwo>(ctx);
+    fn started(&mut self, ctx: &mut Self::Context) {
+        self.subscribe_sync::<TestMessageOne>(ctx);
     }
 }
 
-impl Handler<TestMessageTwo> for TestActor {
+impl Handler<TestMessageOne> for TestActorOne {
     type Result = ();
 
-    fn handle(&mut self, msg: TestMessageTwo, _ctx: &mut Self::Context) {
-        assert_eq!(msg.0, "test");
+    fn handle(&mut self, msg: TestMessageOne, ctx: &mut Self::Context) {
+        assert_eq!(msg.0, 125);
         System::current().stop();
+    }
+}
+
+impl Handler<TestMessageOne> for TestActorTwo {
+    type Result = ();
+
+    fn handle(&mut self, msg: TestMessageOne, _ctx: &mut Self::Context) {
+        assert_eq!(msg.0, 255);
+        self.issue_async(TestMessageOne(125));
     }
 }
 
 #[test]
 fn it_all_works() {
-    System::run(|| { TestActor.start(); });
+    System::run(|| { 
+        TestActorOne.start(); 
+        TestActorTwo.start(); 
+    });
 }

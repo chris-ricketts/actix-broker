@@ -1,5 +1,7 @@
 use actix::prelude::*;
 
+use std::any::TypeId;
+
 use broker::Broker;
 use msgs::*;
 
@@ -12,7 +14,7 @@ where
     /// Asynchronously issue a message.
     fn issue_async<M: BrokerMsg>(&self, msg: M) {
         let broker = Broker::from_registry();
-        broker.do_send(IssueAsync(msg));
+        broker.do_send(IssueAsync(msg, TypeId::of::<Self>()));
     }
 
     /// Synchronously issue a message.
@@ -21,7 +23,7 @@ where
     fn issue_sync<M: BrokerMsg>(&self, msg: M, ctx: &mut Self::Context) {
         let broker = Broker::from_registry();
         broker
-            .send(IssueSync(msg))
+            .send(IssueSync(msg, TypeId::of::<Self>()))
             .into_actor(self)
             .map_err(|_, _, _| ())
             .map(|_, _, _| ())
