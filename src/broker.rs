@@ -1,5 +1,6 @@
 use actix::prelude::*;
 use fnv::FnvHasher;
+use log::trace;
 
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
