@@ -36,7 +36,7 @@ impl Actor for TestActorTwo {
 impl Handler<TestMessageOne> for TestActorOne {
     type Result = ();
 
-    fn handle(&mut self, msg: TestMessageOne, ctx: &mut Self::Context) {
+    fn handle(&mut self, msg: TestMessageOne, _ctx: &mut Self::Context) {
         assert_eq!(msg.0, 125);
         System::current().stop();
     }

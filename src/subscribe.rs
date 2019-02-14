@@ -4,8 +4,8 @@ use actix::prelude::*;
 
 use std::any::TypeId;
 
-use broker::Broker;
-use msgs::*;
+use crate::broker::Broker;
+use crate::msgs::*;
 
 /// The `BrokerSubscribe` trait has functions to register an actor's interest in different
 /// messages.

@@ -2,8 +2,8 @@ use actix::prelude::*;
 
 use std::any::TypeId;
 
-use broker::Broker;
-use msgs::*;
+use crate::broker::Broker;
+use crate::msgs::*;
 
 /// The `BrokerIssue` provides functions to issue messages to any subscribers.
 pub trait BrokerIssue

@@ -6,7 +6,7 @@ use std::collections::HashMap;
 use std::hash::BuildHasherDefault;
 use std::mem;
 
-use msgs::*;
+use crate::msgs::*;
 
 type TypeMap<A> = HashMap<TypeId, A, BuildHasherDefault<FnvHasher>>;
 
