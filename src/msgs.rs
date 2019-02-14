@@ -4,11 +4,7 @@ use std::any::TypeId;
 
 pub trait BrokerMsg: Message<Result = ()> + Send + Clone + 'static {}
 
-impl<M> BrokerMsg for M
-where
-    M: Message<Result = ()> + Send + Clone + 'static,
-{
-}
+impl<M> BrokerMsg for M where M: Message<Result = ()> + Send + Clone + 'static {}
 
 #[derive(Message)]
 pub struct SubscribeAsync<M: BrokerMsg>(pub Recipient<M>, pub TypeId);

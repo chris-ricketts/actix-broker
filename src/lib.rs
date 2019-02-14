@@ -5,7 +5,7 @@
 //! when an actor uses functions from the `BrokerSubscribe` and `BrokerIssue` traits to
 //! either subscribe to or issue a message.
 //!
-//! ## Example 
+//! ## Example
 //! ```rust,no_run
 //! # #[macro_use]
 //! # extern crate actix;
@@ -27,7 +27,7 @@
 //! struct ActorOne;
 //!
 //! impl Actor for ActorOne {
-//!     // Note: The actor context must be Asynchronous, 
+//!     // Note: The actor context must be Asynchronous,
 //!     // i.e. it cannot be 'SyncContext'
 //!     type Context = Context<Self>;
 //!

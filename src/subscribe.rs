@@ -1,6 +1,6 @@
 //! messages.
-use actix::prelude::*;
 use actix::dev::ToEnvelope;
+use actix::prelude::*;
 
 use std::any::TypeId;
 
@@ -10,9 +10,9 @@ use msgs::*;
 /// The `BrokerSubscribe` trait has functions to register an actor's interest in different
 /// messages.
 pub trait BrokerSubscribe
-where 
+where
     Self: Actor,
-    <Self as Actor>::Context: AsyncContext<Self>
+    <Self as Actor>::Context: AsyncContext<Self>,
 {
     /// Asynchronously subscribe to a message.
     fn subscribe_async<M: BrokerMsg>(&self, ctx: &mut Self::Context)
@@ -53,6 +53,6 @@ where
 impl<A> BrokerSubscribe for A
 where
     A: Actor,
-    <A as Actor>::Context: AsyncContext<A>
+    <A as Actor>::Context: AsyncContext<A>,
 {
 }

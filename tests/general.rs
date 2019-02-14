@@ -3,7 +3,7 @@ extern crate actix;
 extern crate actix_broker;
 
 use actix::prelude::*;
-use actix_broker::{BrokerSubscribe, BrokerIssue};
+use actix_broker::{BrokerIssue, BrokerSubscribe};
 
 use std::time::Duration;
 
@@ -19,9 +19,9 @@ impl Actor for TestActorOne {
 
     fn started(&mut self, ctx: &mut Self::Context) {
         self.subscribe_sync::<TestMessageOne>(ctx);
-        ctx.run_later(
-            Duration::from_millis(250), 
-            |a, _| a.issue_async(TestMessageOne(255))); 
+        ctx.run_later(Duration::from_millis(250), |a, _| {
+            a.issue_async(TestMessageOne(255))
+        });
     }
 }
 
@@ -53,8 +53,8 @@ impl Handler<TestMessageOne> for TestActorTwo {
 
 #[test]
 fn it_all_works() {
-    System::run(|| { 
-        TestActorOne.start(); 
-        TestActorTwo.start(); 
+    System::run(|| {
+        TestActorOne.start();
+        TestActorTwo.start();
     });
 }

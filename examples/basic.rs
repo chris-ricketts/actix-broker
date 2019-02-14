@@ -3,7 +3,7 @@ extern crate actix;
 extern crate actix_broker;
 
 use actix::prelude::*;
-use actix_broker::{BrokerSubscribe, BrokerIssue};
+use actix_broker::{BrokerIssue, BrokerSubscribe};
 
 struct ActorOne;
 struct ActorTwo;

@@ -30,11 +30,14 @@ impl Broker {
         let id = TypeId::of::<M>();
         let subs = self.sub_map.get_mut(&id)?;
         trace!("Broker: Found subscription list for {:?}.", id);
-        let subs = subs.drain(..)
+        let subs = subs
+            .drain(..)
             .filter_map(|(id, s)| {
                 if let Ok(rec) = s.downcast::<Recipient<M>>() {
                     Some((id, rec))
-                } else { None }
+                } else {
+                    None
+                }
             })
             .map(|(id, s)| (id, *s))
             .collect();
@@ -105,7 +108,7 @@ impl<M: BrokerMsg> Handler<IssueAsync<M>> for Broker {
                 .filter_map(|(id, s)| {
                     if id == msg.1 {
                         Some((id, s))
-                    }else if s.do_send(msg.0.clone()).is_ok() {
+                    } else if s.do_send(msg.0.clone()).is_ok() {
                         Some((id, s))
                     } else {
                         None
@@ -123,17 +126,16 @@ impl<M: BrokerMsg> Handler<IssueSync<M>> for Broker {
     fn handle(&mut self, msg: IssueSync<M>, ctx: &mut Context<Self>) {
         trace!("Broker: Received IssueSync");
         if let Some(mut subs) = self.take_subs::<M>() {
-            subs.drain(..)
-                .for_each(|(id, s)| {
-                    if id == msg.1 {
-                        self.add_sub::<M>(s, id);
-                    } else {
-                        s.send(msg.0.clone())
-                            .into_actor(self)
-                            .map_err(|_, _, _| ())
-                            .map(move |_, act, _| act.add_sub::<M>(s, id))
-                            .wait(ctx);
-                    }
+            subs.drain(..).for_each(|(id, s)| {
+                if id == msg.1 {
+                    self.add_sub::<M>(s, id);
+                } else {
+                    s.send(msg.0.clone())
+                        .into_actor(self)
+                        .map_err(|_, _, _| ())
+                        .map(move |_, act, _| act.add_sub::<M>(s, id))
+                        .wait(ctx);
+                }
             });
         }
         self.set_msg::<M>(msg.0);
