@@ -30,7 +30,6 @@ impl Broker {
         let id = TypeId::of::<M>();
         let subs = self.sub_map.get_mut(&id)?;
         trace!("Broker: Found subscription list for {:?}.", id);
-        let mut subs = mem::replace(subs, Vec::new());
         let subs = subs.drain(..)
             .filter_map(|(id, s)| {
                 if let Ok(rec) = s.downcast::<Recipient<M>>() {
