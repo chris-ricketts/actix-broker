@@ -62,12 +62,6 @@
 //! # }
 //! # fn main() {}
 //! ```
-#[macro_use]
-extern crate actix;
-extern crate fnv;
-#[macro_use]
-extern crate log;
-
 mod broker;
 mod issue;
 mod msgs;
