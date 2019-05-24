@@ -1,6 +1,6 @@
 [package]
 name = "actix-broker"
-version = "0.1.7"
+version = "0.1.8"
 authors = ["chris ricketts <chris.ricketts@steribar.com>"]
 description = "Message broker for the Actix actor framework"
 license = "MIT OR Apache-2.0"
@@ -11,9 +11,9 @@ exclude = [".gitignore"]
 edition = "2018"
 
 [dependencies]
-actix = "0.7.9"
+actix = "0.8.2"
 fnv = "1.0.6"
 log = "0.4.5"
 
 [dev-dependencies]
-actix-web = "0.7.7"
+actix-web = "1.0.0-rc"
