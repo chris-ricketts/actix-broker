@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate actix;
 extern crate actix_broker;
 
@@ -67,7 +66,7 @@ struct MessageOne(String);
 struct MessageTwo(u8);
 
 fn main() {
-    System::run(|| {
+    let _ = System::run(|| {
         ActorTwo.start();
         ActorThree.start();
         ActorOne.start();

@@ -1,11 +1,10 @@
-#[macro_use]
 extern crate actix;
 extern crate actix_broker;
 extern crate actix_web;
 
 use actix::prelude::*;
 use actix_broker::{Broker, BrokerSubscribe};
-use actix_web::{server, App, Error, HttpRequest, HttpResponse};
+use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 
 #[derive(Clone, Debug, Message)]
 struct Hello;
@@ -28,7 +27,7 @@ impl Handler<Hello> for TestActor {
     }
 }
 
-fn index(_req: &HttpRequest) -> Result<HttpResponse, Error> {
+fn index(_req: HttpRequest) -> Result<HttpResponse, Error> {
     Broker::issue_async(Hello);
     Ok(HttpResponse::Ok()
         .content_type("text/plain")
@@ -36,10 +35,10 @@ fn index(_req: &HttpRequest) -> Result<HttpResponse, Error> {
 }
 
 fn main() {
-    System::run(|| {
+    let _ = System::run(|| {
         TestActor.start();
 
-        server::new(|| App::new().resource("/", |r| r.f(index)))
+        HttpServer::new(|| App::new().service(web::resource("/").route(web::get().to(index))))
             .bind("127.0.0.1:8080")
             .unwrap()
             .start();
