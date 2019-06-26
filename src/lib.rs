@@ -12,7 +12,7 @@
 //! # extern crate actix_broker;
 //! use actix::prelude::*;
 //! // Bring both these traits into scope.
-//! use actix_broker::{BrokerSubscribe, BrokerIssue};
+//! use actix_broker::{BrokerSubscribe, BrokerIssue, SystemBroker};
 //!
 //! // Note: The message must implement 'Clone'
 //! #[derive(Clone, Message)]
@@ -33,13 +33,13 @@
 //!
 //!     fn started(&mut self,ctx: &mut Self::Context) {
 //!         // Asynchronously subscribe to a message
-//!         self.subscribe_async::<MessageOne>(ctx);
+//!         self.subscribe_async::<SystemBroker, MessageOne>(ctx);
 //!         // Asynchronously issue a message to any subscribers
-//!         self.issue_async(MessageOne);
+//!         self.issue_async::<SystemBroker, _>(MessageOne);
 //!         // Synchronously subscribe to a message
-//!         self.subscribe_sync::<MessageTwo>(ctx);
+//!         self.subscribe_sync::<SystemBroker, MessageTwo>(ctx);
 //!         // Synchronously issue a message to any subscribers
-//!         self.issue_sync(MessageTwo, ctx);
+//!         self.issue_sync::<SystemBroker, _>(MessageTwo, ctx);
 //!     }
 //! }
 //!     
@@ -49,7 +49,7 @@
 //!
 //!     fn handle(&mut self, msg: MessageOne, ctx: &mut Self::Context) {
 //!         // An actor does not have to handle a message to just issue it
-//!         self.issue_async(MessageThree);
+//!         self.issue_async::<SystemBroker, _>(MessageThree);
 //!     }
 //! }
 //!
@@ -69,7 +69,7 @@ mod subscribe;
 
 pub use crate::msgs::BrokerMsg;
 
-pub use crate::broker::Broker;
+pub use crate::broker::{Broker, SystemBroker, ArbiterBroker};
 
 pub use crate::subscribe::BrokerSubscribe;
 

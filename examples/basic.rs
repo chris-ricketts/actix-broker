@@ -2,18 +2,20 @@ extern crate actix;
 extern crate actix_broker;
 
 use actix::prelude::*;
-use actix_broker::{BrokerIssue, BrokerSubscribe};
+use actix_broker::{BrokerIssue, BrokerSubscribe, SystemBroker};
 
 struct ActorOne;
 struct ActorTwo;
 struct ActorThree;
 
+type BrokerType = SystemBroker;
+
 impl Actor for ActorOne {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.subscribe_sync::<MessageTwo>(ctx);
-        self.issue_async(MessageOne("hello".to_string()));
+        self.subscribe_sync::<BrokerType, MessageTwo>(ctx);
+        self.issue_async::<BrokerType, _>(MessageOne("hello".to_string()));
     }
 }
 
@@ -29,7 +31,7 @@ impl Actor for ActorTwo {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.subscribe_async::<MessageOne>(ctx);
+        self.subscribe_async::<BrokerType, MessageOne>(ctx);
     }
 }
 
@@ -38,7 +40,7 @@ impl Handler<MessageOne> for ActorTwo {
 
     fn handle(&mut self, msg: MessageOne, _ctx: &mut Self::Context) {
         println!("ActorTwo Received: {:?}", msg);
-        self.issue_async(MessageTwo(0));
+        self.issue_async::<BrokerType, _>(MessageTwo(0));
     }
 }
 
@@ -46,7 +48,7 @@ impl Actor for ActorThree {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.subscribe_async::<MessageOne>(ctx);
+        self.subscribe_async::<BrokerType, MessageOne>(ctx);
     }
 }
 
@@ -55,7 +57,7 @@ impl Handler<MessageOne> for ActorThree {
 
     fn handle(&mut self, msg: MessageOne, _ctx: &mut Self::Context) {
         println!("ActorThree Received: {:?}", msg);
-        self.issue_async(MessageTwo(1));
+        self.issue_async::<BrokerType, _>(MessageTwo(1));
     }
 }
 

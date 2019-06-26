@@ -2,7 +2,7 @@ use actix::prelude::*;
 
 use std::any::TypeId;
 
-use crate::broker::Broker;
+use crate::broker::{RegisteredBroker};
 use crate::msgs::*;
 
 /// The `BrokerIssue` provides functions to issue messages to any subscribers.
@@ -12,16 +12,16 @@ where
     <Self as Actor>::Context: AsyncContext<Self>,
 {
     /// Asynchronously issue a message.
-    fn issue_async<M: BrokerMsg>(&self, msg: M) {
-        let broker = Broker::from_registry();
+    fn issue_async<T: RegisteredBroker, M: BrokerMsg>(&self, msg: M) {
+        let broker = T::get_broker();
         broker.do_send(IssueAsync(msg, TypeId::of::<Self>()));
     }
 
     /// Synchronously issue a message.
     /// This also causes the broker to synchronously forward those messages on to any subscribers
     /// before handling any other messages.
-    fn issue_sync<M: BrokerMsg>(&self, msg: M, ctx: &mut Self::Context) {
-        let broker = Broker::from_registry();
+    fn issue_sync<T: RegisteredBroker, M: BrokerMsg>(&self, msg: M, ctx: &mut Self::Context) {
+        let broker = T::get_broker();
         broker
             .send(IssueSync(msg, TypeId::of::<Self>()))
             .into_actor(self)
