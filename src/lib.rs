@@ -33,13 +33,13 @@
 //!
 //!     fn started(&mut self,ctx: &mut Self::Context) {
 //!         // Asynchronously subscribe to a message on the system (global) broker
-//!         self.subscribe_async::<SystemBroker, MessageOne>(ctx);
+//!         self.subscribe_system_async::<MessageOne>(ctx);
 //!         // Asynchronously issue a message to any subscribers on the system (global) broker
-//!         self.issue_async::<SystemBroker, _>(MessageOne);
+//!         self.issue_system_async(MessageOne);
 //!         // Synchronously subscribe to a message on the arbiter (local) broker
-//!         self.subscribe_sync::<ArbiterBroker, MessageTwo>(ctx);
+//!         self.subscribe_arbiter_sync::<MessageTwo>(ctx);
 //!         // Synchronously issue a message to any subscribers on the arbiter (local) broker
-//!         self.issue_sync::<ArbiterBroker, _>(MessageTwo, ctx);
+//!         self.issue_arbiter_sync(MessageTwo, ctx);
 //!     }
 //! }
 //!     

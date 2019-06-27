@@ -4,7 +4,7 @@ use actix::prelude::*;
 
 use std::any::TypeId;
 
-use crate::broker::RegisteredBroker;
+use crate::broker::{RegisteredBroker, SystemBroker, ArbiterBroker};
 use crate::msgs::*;
 
 /// The `BrokerSubscribe` trait has functions to register an actor's interest in different
@@ -47,6 +47,46 @@ where
                 }
             })
             .wait(ctx);
+    }
+
+    /// Helper to asynchronously subscribe to a system broker
+    /// This is the equivalent of `self.subscribe_async::<SystemBroker, M>(ctx);`
+    fn subscribe_system_async<M: BrokerMsg>(&self, ctx: &mut Self::Context)
+    where
+        Self: Handler<M>,
+        <Self as Actor>::Context: ToEnvelope<Self, M>,
+    {
+        self.subscribe_async::<SystemBroker, M>(ctx);
+    }
+
+    /// Helper to synchronously subscribe to a system broker
+    /// This is the equivalent of `self.subscribe_sync::<SystemBroker, M>(ctx);
+    fn subscribe_system_sync<M: BrokerMsg>(&self, ctx: &mut Self::Context)
+    where
+        Self: Handler<M>,
+        <Self as Actor>::Context: ToEnvelope<Self, M>,
+    {
+        self.subscribe_sync::<SystemBroker, M>(ctx);
+    }
+
+    /// Helper to asynchronously subscribe to an arbiter-specific broker
+    /// This is the equivalent of `self.subscribe_async::<ArbiterBroker, M>(ctx);`
+    fn subscribe_arbiter_async<M: BrokerMsg>(&self, ctx: &mut Self::Context)
+    where
+        Self: Handler<M>,
+        <Self as Actor>::Context: ToEnvelope<Self, M>,
+    {
+        self.subscribe_async::<ArbiterBroker, M>(ctx);
+    }
+
+    /// Helper to synchronously subscribe to an arbiter-specific broker
+    /// This is the equivalent of `self.subscribe_sync::<ArbiterBroker, M>(ctx);
+    fn subscribe_arbiter_sync<M: BrokerMsg>(&self, ctx: &mut Self::Context)
+    where
+        Self: Handler<M>,
+        <Self as Actor>::Context: ToEnvelope<Self, M>,
+    {
+        self.subscribe_sync::<ArbiterBroker, M>(ctx);
     }
 }
 
