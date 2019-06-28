@@ -6,19 +6,27 @@ use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::hash::BuildHasherDefault;
 use std::mem;
+use std::marker::PhantomData;
 
 use crate::msgs::*;
 
 type TypeMap<A> = HashMap<TypeId, A, BuildHasherDefault<FnvHasher>>;
 
 #[derive(Default)]
-pub struct Broker {
+pub struct Broker<T> {
     sub_map: TypeMap<Vec<(TypeId, Box<Any>)>>,
     msg_map: TypeMap<Box<Any>>,
+    _t: PhantomData<T>,
 }
 
+#[derive(Default)]
+pub struct SystemBroker;
+
+#[derive(Default)]
+pub struct ArbiterBroker;
+
 /// The system service actor that keeps track of subscriptions and routes messages to them.
-impl Broker {
+impl Broker<SystemBroker> {
     /// Send messages asynchronously via the broker. It can be called from with
     /// actors with a `SyncContext`, or where you don't have access to `self`. e.g. From within
     /// a `HttpHandler` from `actix-web`.
@@ -26,7 +34,21 @@ impl Broker {
         let broker = Self::from_registry();
         broker.do_send(IssueAsync(msg, TypeId::of::<Self>()));
     }
+}
 
+/// The system service actor that keeps track of subscriptions and routes messages to them.
+impl Broker<ArbiterBroker> {
+    /// Send messages asynchronously via the broker. It can be called from with
+    /// actors with a `SyncContext`, or where you don't have access to `self`. e.g. From within
+    /// a `HttpHandler` from `actix-web`.
+    pub fn issue_async<M: BrokerMsg>(msg: M) {
+        let broker = Self::from_registry();
+        broker.do_send(IssueAsync(msg, TypeId::of::<Self>()));
+    }
+}
+
+/// The system service actor that keeps track of subscriptions and routes messages to them.
+impl <T> Broker<T> {
     fn take_subs<M: BrokerMsg>(&mut self) -> Option<Vec<(TypeId, Recipient<M>)>> {
         let id = TypeId::of::<M>();
         let subs = self.sub_map.get_mut(&id)?;
@@ -80,7 +102,7 @@ impl Broker {
     }
 }
 
-impl<M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker {
+impl<T: 'static, M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker<T> {
     type Result = ();
 
     fn handle(&mut self, msg: SubscribeAsync<M>, _ctx: &mut Context<Self>) {
@@ -89,7 +111,7 @@ impl<M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker {
     }
 }
 
-impl<M: BrokerMsg> Handler<SubscribeSync<M>> for Broker {
+impl<T: 'static, M: BrokerMsg> Handler<SubscribeSync<M>> for Broker<T> {
     type Result = Option<M>;
 
     fn handle(&mut self, msg: SubscribeSync<M>, _ctx: &mut Context<Self>) -> Self::Result {
@@ -99,7 +121,7 @@ impl<M: BrokerMsg> Handler<SubscribeSync<M>> for Broker {
     }
 }
 
-impl<M: BrokerMsg> Handler<IssueAsync<M>> for Broker {
+impl<T: 'static, M: BrokerMsg> Handler<IssueAsync<M>> for Broker<T> {
     type Result = ();
 
     fn handle(&mut self, msg: IssueAsync<M>, _ctx: &mut Context<Self>) {
@@ -121,7 +143,7 @@ impl<M: BrokerMsg> Handler<IssueAsync<M>> for Broker {
     }
 }
 
-impl<M: BrokerMsg> Handler<IssueSync<M>> for Broker {
+impl<T: 'static, M: BrokerMsg> Handler<IssueSync<M>> for Broker<T> {
     type Result = ();
 
     fn handle(&mut self, msg: IssueSync<M>, ctx: &mut Context<Self>) {
@@ -143,10 +165,31 @@ impl<M: BrokerMsg> Handler<IssueSync<M>> for Broker {
     }
 }
 
-impl Actor for Broker {
+impl <T: 'static > Actor for Broker<T> {
     type Context = Context<Self>;
 }
 
-impl SystemService for Broker {}
+impl SystemService for Broker<SystemBroker> {}
+impl Supervised for Broker<SystemBroker> {}
 
-impl Supervised for Broker {}
+
+impl ArbiterService for Broker<ArbiterBroker> {}
+impl Supervised for Broker<ArbiterBroker> {}
+
+pub trait RegisteredBroker: 'static 
+where Self: std::marker::Sized
+{
+    fn get_broker() -> Addr<Broker<Self>>;
+}
+
+impl RegisteredBroker for SystemBroker {
+    fn get_broker() -> Addr<Broker<Self>> {
+        Broker::<SystemBroker>::from_registry()
+    }
+}
+
+impl RegisteredBroker for ArbiterBroker {
+    fn get_broker() -> Addr<Broker<Self>> {
+        Broker::<ArbiterBroker>::from_registry()
+    }
+}

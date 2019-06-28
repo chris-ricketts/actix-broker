@@ -1,9 +1,9 @@
-#[macro_use]
+
 extern crate actix;
 extern crate actix_broker;
 
 use actix::prelude::*;
-use actix_broker::{BrokerIssue, BrokerSubscribe};
+use actix_broker::{BrokerIssue, BrokerSubscribe, SystemBroker};
 
 use std::time::Duration;
 
@@ -18,9 +18,9 @@ impl Actor for TestActorOne {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.subscribe_sync::<TestMessageOne>(ctx);
+        self.subscribe_sync::<SystemBroker, TestMessageOne>(ctx);
         ctx.run_later(Duration::from_millis(250), |a, _| {
-            a.issue_async(TestMessageOne(255))
+            a.issue_async::<SystemBroker, _>(TestMessageOne(255))
         });
     }
 }
@@ -29,7 +29,7 @@ impl Actor for TestActorTwo {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.subscribe_sync::<TestMessageOne>(ctx);
+        self.subscribe_sync::<SystemBroker, TestMessageOne>(ctx);
     }
 }
 
@@ -47,7 +47,7 @@ impl Handler<TestMessageOne> for TestActorTwo {
 
     fn handle(&mut self, msg: TestMessageOne, _ctx: &mut Self::Context) {
         assert_eq!(msg.0, 255);
-        self.issue_async(TestMessageOne(125));
+        self.issue_async::<SystemBroker, _>(TestMessageOne(125));
     }
 }
 
@@ -56,5 +56,5 @@ fn it_all_works() {
     System::run(|| {
         TestActorOne.start();
         TestActorTwo.start();
-    });
+    }).unwrap();
 }

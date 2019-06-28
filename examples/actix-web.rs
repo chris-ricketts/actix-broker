@@ -3,7 +3,7 @@ extern crate actix_broker;
 extern crate actix_web;
 
 use actix::prelude::*;
-use actix_broker::{Broker, BrokerSubscribe};
+use actix_broker::{Broker, BrokerSubscribe, SystemBroker};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 
 #[derive(Clone, Debug, Message)]
@@ -15,7 +15,7 @@ impl Actor for TestActor {
     type Context = Context<Self>;
 
     fn started(&mut self, ctx: &mut Self::Context) {
-        self.subscribe_async::<Hello>(ctx);
+        self.subscribe_async::<SystemBroker, Hello>(ctx);
     }
 }
 
@@ -28,7 +28,7 @@ impl Handler<Hello> for TestActor {
 }
 
 fn index(_req: HttpRequest) -> Result<HttpResponse, Error> {
-    Broker::issue_async(Hello);
+    Broker::<SystemBroker>::issue_async(Hello);
     Ok(HttpResponse::Ok()
         .content_type("text/plain")
         .body("Welcome!"))

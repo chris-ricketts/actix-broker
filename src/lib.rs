@@ -1,9 +1,9 @@
 //! # Actix-Broker
 //!
-//! The `actix_broker` crate contains a Broker `SystemService` that keeps track of active
-//! subscriptions to different `Messages`. This Broker service is automatically started
-//! when an actor uses functions from the `BrokerSubscribe` and `BrokerIssue` traits to
-//! either subscribe to or issue a message.
+//! The `actix_broker` crate contains `SystemService` and `ArbiterService` Brokers that 
+//! keep track of active subscriptions to different `Messages`. Broker services are 
+//! automatically started when an actor uses functions from the `BrokerSubscribe` and 
+//! `BrokerIssue` traits to either subscribe to or issue a message.
 //!
 //! ## Example
 //! ```rust,no_run
@@ -12,7 +12,7 @@
 //! # extern crate actix_broker;
 //! use actix::prelude::*;
 //! // Bring both these traits into scope.
-//! use actix_broker::{BrokerSubscribe, BrokerIssue};
+//! use actix_broker::{BrokerSubscribe, BrokerIssue, SystemBroker, ArbiterBroker};
 //!
 //! // Note: The message must implement 'Clone'
 //! #[derive(Clone, Message)]
@@ -32,14 +32,14 @@
 //!     type Context = Context<Self>;
 //!
 //!     fn started(&mut self,ctx: &mut Self::Context) {
-//!         // Asynchronously subscribe to a message
-//!         self.subscribe_async::<MessageOne>(ctx);
-//!         // Asynchronously issue a message to any subscribers
-//!         self.issue_async(MessageOne);
-//!         // Synchronously subscribe to a message
-//!         self.subscribe_sync::<MessageTwo>(ctx);
-//!         // Synchronously issue a message to any subscribers
-//!         self.issue_sync(MessageTwo, ctx);
+//!         // Asynchronously subscribe to a message on the system (global) broker
+//!         self.subscribe_system_async::<MessageOne>(ctx);
+//!         // Asynchronously issue a message to any subscribers on the system (global) broker
+//!         self.issue_system_async(MessageOne);
+//!         // Synchronously subscribe to a message on the arbiter (local) broker
+//!         self.subscribe_arbiter_sync::<MessageTwo>(ctx);
+//!         // Synchronously issue a message to any subscribers on the arbiter (local) broker
+//!         self.issue_arbiter_sync(MessageTwo, ctx);
 //!     }
 //! }
 //!     
@@ -49,7 +49,7 @@
 //!
 //!     fn handle(&mut self, msg: MessageOne, ctx: &mut Self::Context) {
 //!         // An actor does not have to handle a message to just issue it
-//!         self.issue_async(MessageThree);
+//!         self.issue_async::<SystemBroker, _>(MessageThree);
 //!     }
 //! }
 //!
@@ -69,7 +69,7 @@ mod subscribe;
 
 pub use crate::msgs::BrokerMsg;
 
-pub use crate::broker::Broker;
+pub use crate::broker::{Broker, SystemBroker, ArbiterBroker};
 
 pub use crate::subscribe::BrokerSubscribe;
 
