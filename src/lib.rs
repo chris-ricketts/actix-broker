@@ -11,8 +11,7 @@
 //! # extern crate actix;
 //! # extern crate actix_broker;
 //! use actix::prelude::*;
-//! // Bring both these traits into scope.
-//! use actix_broker::{BrokerSubscribe, BrokerIssue, SystemBroker, ArbiterBroker};
+//! use actix_broker::{BrokerSubscribe, BrokerIssue, SystemBroker, ArbiterBroker, Broker};
 //!
 //! // Note: The message must implement 'Clone'
 //! #[derive(Clone, Message)]
@@ -53,7 +52,12 @@
 //!     }
 //! }
 //!
-//!     // Handler for MessageTwo...
+//! // Messages can also be sent from outside actors
+//! fn my_function() {
+//!     Broker::<SystemBroker>::issue_async(MessageOne);
+//! }
+//! #
+//! # // Handler for MessageTwo...
 //! # impl Handler<MessageTwo> for ActorOne {
 //! #     type Result = ();
 //!
