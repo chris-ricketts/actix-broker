@@ -14,8 +14,8 @@ type TypeMap<A> = HashMap<TypeId, A, BuildHasherDefault<FnvHasher>>;
 
 #[derive(Default)]
 pub struct Broker<T> {
-    sub_map: TypeMap<Vec<(TypeId, Box<Any>)>>,
-    msg_map: TypeMap<Box<Any>>,
+    sub_map: TypeMap<Vec<(TypeId, Box<dyn Any>)>>,
+    msg_map: TypeMap<Box<dyn Any>>,
     _t: PhantomData<T>,
 }
 
@@ -176,7 +176,7 @@ impl Supervised for Broker<SystemBroker> {}
 impl ArbiterService for Broker<ArbiterBroker> {}
 impl Supervised for Broker<ArbiterBroker> {}
 
-pub trait RegisteredBroker: 'static 
+pub trait RegisteredBroker: 'static
 where Self: std::marker::Sized
 {
     fn get_broker() -> Addr<Broker<Self>>;
