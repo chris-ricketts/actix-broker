@@ -5,7 +5,9 @@ use std::any::TypeId;
 use crate::broker::{RegisteredBroker, SystemBroker, ArbiterBroker};
 use crate::msgs::*;
 
-/// The `BrokerIssue` provides functions to issue messages to any subscribers.
+/// The `BrokerIssue` provides functions to issue messages to subscribers.
+///
+/// This will not deliver the message to the actor that sent it.
 pub trait BrokerIssue
 where
     Self: Actor,
