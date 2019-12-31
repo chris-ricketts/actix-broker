@@ -1,4 +1,3 @@
-
 extern crate actix;
 extern crate actix_broker;
 
@@ -8,6 +7,7 @@ use actix_broker::{BrokerIssue, BrokerSubscribe, SystemBroker};
 use std::time::Duration;
 
 #[derive(Clone, Message)]
+#[rtype(result = "()")]
 struct TestMessageOne(u8);
 
 struct TestActorOne;
@@ -56,5 +56,6 @@ fn it_all_works() {
     System::run(|| {
         TestActorOne.start();
         TestActorTwo.start();
-    }).unwrap();
+    })
+    .unwrap();
 }

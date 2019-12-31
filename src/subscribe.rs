@@ -4,7 +4,7 @@ use actix::prelude::*;
 
 use std::any::TypeId;
 
-use crate::broker::{RegisteredBroker, SystemBroker, ArbiterBroker};
+use crate::broker::{ArbiterBroker, RegisteredBroker, SystemBroker};
 use crate::msgs::*;
 
 /// The `BrokerSubscribe` trait has functions to register an actor's interest in different
@@ -15,7 +15,7 @@ where
     <Self as Actor>::Context: AsyncContext<Self>,
 {
     /// Asynchronously subscribe to a message.
-    fn subscribe_async<T: RegisteredBroker,  M: BrokerMsg>(&self, ctx: &mut Self::Context)
+    fn subscribe_async<T: RegisteredBroker, M: BrokerMsg>(&self, ctx: &mut Self::Context)
     where
         Self: Handler<M>,
         <Self as Actor>::Context: ToEnvelope<Self, M>,
@@ -40,9 +40,8 @@ where
         broker
             .send(SubscribeSync(recipient, TypeId::of::<Self>()))
             .into_actor(self)
-            .map_err(|_, _, _| ())
             .map(move |m, _, ctx| {
-                if let Some(msg) = m {
+                if let Ok(Some(msg)) = m {
                     ctx.notify(msg);
                 }
             })

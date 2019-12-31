@@ -62,9 +62,11 @@ impl Handler<MessageOne> for ActorThree {
 }
 
 #[derive(Clone, Debug, Message)]
+#[rtype(result = "()")]
 struct MessageOne(String);
 
 #[derive(Clone, Debug, Message)]
+#[rtype(result = "()")]
 struct MessageTwo(u8);
 
 fn main() {
