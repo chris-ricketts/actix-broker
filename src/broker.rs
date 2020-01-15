@@ -5,8 +5,8 @@ use log::trace;
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::hash::BuildHasherDefault;
-use std::mem;
 use std::marker::PhantomData;
+use std::mem;
 
 use crate::msgs::*;
 
@@ -48,7 +48,7 @@ impl Broker<ArbiterBroker> {
 }
 
 /// The system service actor that keeps track of subscriptions and routes messages to them.
-impl <T> Broker<T> {
+impl<T> Broker<T> {
     fn take_subs<M: BrokerMsg>(&mut self) -> Option<Vec<(TypeId, Recipient<M>)>> {
         let id = TypeId::of::<M>();
         let subs = self.sub_map.get_mut(&id)?;
@@ -102,7 +102,7 @@ impl <T> Broker<T> {
     }
 }
 
-impl<T: 'static, M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker<T> {
+impl<T: 'static + Unpin, M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker<T> {
     type Result = ();
 
     fn handle(&mut self, msg: SubscribeAsync<M>, _ctx: &mut Context<Self>) {
@@ -111,7 +111,7 @@ impl<T: 'static, M: BrokerMsg> Handler<SubscribeAsync<M>> for Broker<T> {
     }
 }
 
-impl<T: 'static, M: BrokerMsg> Handler<SubscribeSync<M>> for Broker<T> {
+impl<T: 'static + Unpin, M: BrokerMsg> Handler<SubscribeSync<M>> for Broker<T> {
     type Result = Option<M>;
 
     fn handle(&mut self, msg: SubscribeSync<M>, _ctx: &mut Context<Self>) -> Self::Result {
@@ -121,7 +121,7 @@ impl<T: 'static, M: BrokerMsg> Handler<SubscribeSync<M>> for Broker<T> {
     }
 }
 
-impl<T: 'static, M: BrokerMsg> Handler<IssueAsync<M>> for Broker<T> {
+impl<T: 'static + Unpin, M: BrokerMsg> Handler<IssueAsync<M>> for Broker<T> {
     type Result = ();
 
     fn handle(&mut self, msg: IssueAsync<M>, _ctx: &mut Context<Self>) {
@@ -143,7 +143,7 @@ impl<T: 'static, M: BrokerMsg> Handler<IssueAsync<M>> for Broker<T> {
     }
 }
 
-impl<T: 'static, M: BrokerMsg> Handler<IssueSync<M>> for Broker<T> {
+impl<T: 'static + Unpin, M: BrokerMsg> Handler<IssueSync<M>> for Broker<T> {
     type Result = ();
 
     fn handle(&mut self, msg: IssueSync<M>, ctx: &mut Context<Self>) {
@@ -155,7 +155,6 @@ impl<T: 'static, M: BrokerMsg> Handler<IssueSync<M>> for Broker<T> {
                 } else {
                     s.send(msg.0.clone())
                         .into_actor(self)
-                        .map_err(|_, _, _| ())
                         .map(move |_, act, _| act.add_sub::<M>(s, id))
                         .wait(ctx);
                 }
@@ -165,19 +164,19 @@ impl<T: 'static, M: BrokerMsg> Handler<IssueSync<M>> for Broker<T> {
     }
 }
 
-impl <T: 'static > Actor for Broker<T> {
+impl<T: 'static + Unpin> Actor for Broker<T> {
     type Context = Context<Self>;
 }
 
 impl SystemService for Broker<SystemBroker> {}
 impl Supervised for Broker<SystemBroker> {}
 
-
 impl ArbiterService for Broker<ArbiterBroker> {}
 impl Supervised for Broker<ArbiterBroker> {}
 
-pub trait RegisteredBroker: 'static
-where Self: std::marker::Sized
+pub trait RegisteredBroker: 'static + Unpin
+where
+    Self: std::marker::Sized,
 {
     fn get_broker() -> Addr<Broker<Self>>;
 }

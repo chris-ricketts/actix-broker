@@ -1,8 +1,8 @@
 //! # Actix-Broker
 //!
-//! The `actix_broker` crate contains `SystemService` and `ArbiterService` Brokers that 
-//! keep track of active subscriptions to different `Messages`. Broker services are 
-//! automatically started when an actor uses functions from the `BrokerSubscribe` and 
+//! The `actix_broker` crate contains `SystemService` and `ArbiterService` Brokers that
+//! keep track of active subscriptions to different `Messages`. Broker services are
+//! automatically started when an actor uses functions from the `BrokerSubscribe` and
 //! `BrokerIssue` traits to either subscribe to or issue a message.
 //!
 //! ## Example
@@ -15,12 +15,15 @@
 //!
 //! // Note: The message must implement 'Clone'
 //! #[derive(Clone, Message)]
+//! #[rtype(result = "()")]
 //! struct MessageOne;
 //!
 //! #[derive(Clone, Message)]
+//! #[rtype(result = "()")]
 //! struct MessageTwo;
 //!
 //! #[derive(Clone, Message)]
+//! #[rtype(result = "()")]
 //! struct MessageThree;
 //!
 //! struct ActorOne;
@@ -73,7 +76,7 @@ mod subscribe;
 
 pub use crate::msgs::BrokerMsg;
 
-pub use crate::broker::{Broker, SystemBroker, ArbiterBroker};
+pub use crate::broker::{ArbiterBroker, Broker, SystemBroker};
 
 pub use crate::subscribe::BrokerSubscribe;
 

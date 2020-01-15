@@ -7,6 +7,7 @@ use actix_broker::{Broker, BrokerSubscribe, SystemBroker};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
 
 #[derive(Clone, Debug, Message)]
+#[rtype(result = "()")]
 struct Hello;
 
 struct TestActor;
