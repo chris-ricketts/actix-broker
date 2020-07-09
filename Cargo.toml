@@ -11,7 +11,7 @@ exclude = [".gitignore"]
 edition = "2018"
 
 [dependencies]
-actix = { version = "0.9.0", default-features = false }
+actix = "0.9.0"
 fnv = "1.0.6"
 log = "0.4.5"
 
