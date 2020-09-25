@@ -14,7 +14,6 @@ struct TestActor;
 
 impl Actor for TestActor {
     type Context = Context<Self>;
-
     fn started(&mut self, ctx: &mut Self::Context) {
         self.subscribe_async::<SystemBroker, Hello>(ctx);
     }
@@ -22,27 +21,29 @@ impl Actor for TestActor {
 
 impl Handler<Hello> for TestActor {
     type Result = ();
-
     fn handle(&mut self, msg: Hello, _ctx: &mut Self::Context) {
         println!("TestActor: Received {:?}", msg);
     }
 }
 
-fn index(_req: HttpRequest) -> Result<HttpResponse, Error> {
+async fn index(_req: HttpRequest) -> Result<HttpResponse, Error> {
     Broker::<SystemBroker>::issue_async(Hello);
     Ok(HttpResponse::Ok()
         .content_type("text/plain")
         .body("Welcome!"))
 }
 
-fn main() {
-    let _ = System::run(|| {
-        TestActor.start();
+#[actix_web::main]
+async fn main() {
+    TestActor.start();
 
-        HttpServer::new(|| App::new().service(web::resource("/").route(web::get().to(index))))
-            .bind("127.0.0.1:8080")
-            .unwrap()
-            .start();
-        println!("Hit up 127.0.0.1:8080");
-    });
+    HttpServer::new(||
+        App::new().service(web::scope("/")
+            .service(web::resource("")
+                .route(web::get().to(index)))))
+        .bind("127.0.0.1:8080")
+        .unwrap()
+        .run()
+        .await;
+    println!("Hit up 127.0.0.1:8080");
 }
