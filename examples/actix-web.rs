@@ -2,6 +2,7 @@ extern crate actix;
 extern crate actix_broker;
 extern crate actix_web;
 
+use std::io;
 use actix::prelude::*;
 use actix_broker::{Broker, BrokerSubscribe, SystemBroker};
 use actix_web::{web, App, Error, HttpRequest, HttpResponse, HttpServer};
@@ -34,7 +35,7 @@ async fn index(_req: HttpRequest) -> Result<HttpResponse, Error> {
 }
 
 #[actix_web::main]
-async fn main() {
+async fn main() ->io::Result<()> {
     TestActor.start();
 
     HttpServer::new(||
@@ -44,6 +45,5 @@ async fn main() {
         .bind("127.0.0.1:8080")
         .unwrap()
         .run()
-        .await;
-    println!("Hit up 127.0.0.1:8080");
+        .await
 }
